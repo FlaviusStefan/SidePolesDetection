@@ -45,61 +45,77 @@ startSource_Video();
 
 // This function will be responsible for processing each frame to detect poles.
 function detectPoles(srcImage, dstImage) {
-  let gray = new cv.Mat();
-  let blurred = new cv.Mat();
-  let edges = new cv.Mat();
-  let contours = new cv.MatVector();
-  let hierarchy = new cv.Mat();
+    let hsv = new cv.Mat();
+    let mask = new cv.Mat();
+    let gray = new cv.Mat();
+    let blurred = new cv.Mat();
+    let edges = new cv.Mat();
+    let contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
 
-  // Convert to grayscale
-  cv.cvtColor(srcImage, gray, cv.COLOR_RGBA2GRAY, 0);
+    // Convert to grayscale
+    cv.cvtColor(srcImage, gray, cv.COLOR_RGBA2GRAY, 0);
 
-  // Optional: apply Gaussian blur to reduce noise
-  cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 1.5, 1.5);
+    // Convert to HSV and threshold for white colors
+    cv.cvtColor(srcImage, hsv, cv.COLOR_RGBA2RGB);
+    cv.cvtColor(hsv, hsv, cv.COLOR_RGB2HSV);
+    let lowerWhite = new cv.Mat(hsv.rows, hsv.cols, hsv.type(), [0, 0, 168, 255]);
+    let upperWhite = new cv.Mat(hsv.rows, hsv.cols, hsv.type(), [172, 111, 255, 255]);
+    
+    // Create a mask that captures areas of the image that are white
+    cv.inRange(hsv, lowerWhite, upperWhite, mask);
 
-  // Detect edges
-  cv.Canny(blurred, edges, 75, 150, 3, false);
+    // Optional: apply Gaussian blur to reduce noise and improve edge detection
+    cv.GaussianBlur(mask, blurred, new cv.Size(5, 5), 1.5, 1.5);
 
-  // Find contours
-  cv.findContours(
-    edges,
-    contours,
-    hierarchy,
-    cv.RETR_EXTERNAL,
-    cv.CHAIN_APPROX_SIMPLE
-  );
+    // Detect edges
+    cv.Canny(blurred, edges, 75, 150, 3, false);
 
-  // Draw rectangles around the detected poles
-  for (let i = 0; i < contours.size(); ++i) {
-    let cnt = contours.get(i);
-    let rect = cv.boundingRect(cnt);
-    let aspectRatio = rect.width / rect.height;
+    // Find contours from the edge detection
+    cv.findContours(
+        edges,
+        contours,
+        hierarchy,
+        cv.RETR_EXTERNAL,
+        cv.CHAIN_APPROX_SIMPLE
+    );
 
-    // Filter the contour by aspect ratio, area, width, and height
-    if (
-      aspectRatio > 0.2 &&
-      aspectRatio < 4.0 &&
-      rect.width > 10 &&
-      rect.height > 40
-    ) {
-      // Assume poles are relatively thin and tall compared to their width
-      // Draw the rectangle on the destination image
-      let color = new cv.Scalar(255, 0, 0);
-      cv.rectangle(
-        dstImage,
-        new cv.Point(rect.x, rect.y),
-        new cv.Point(rect.x + rect.width, rect.y + rect.height),
-        color,
-        2
-      );
+    // Draw rectangles around the detected poles
+    for (let i = 0; i < contours.size(); ++i) {
+        let cnt = contours.get(i);
+        let rect = cv.boundingRect(cnt);
+        let aspectRatio = rect.width / rect.height;
+
+        // Filter the contour by aspect ratio, area, width, and height
+        // Adjust these values as needed for your specific case
+        if (
+            aspectRatio > 0.2 && // Poles are more vertical, so width should be smaller than height
+            aspectRatio < 1.0 && // Adjust this as necessary
+            rect.width > 10 &&   // Minimum width to avoid detecting very thin structures
+            rect.height > 40 &&  // Minimum height to avoid detecting very short structures
+            rect.height < 300) { // Maximum height to avoid detecting very tall structures
+                // Assume poles are relatively thin and tall compared to their width
+                let color = new cv.Scalar(255, 0, 0); // Color for the rectangle (Blue, Green, Red)
+                cv.rectangle(
+                    dstImage,
+                    new cv.Point(rect.x, rect.y),
+                    new cv.Point(rect.x + rect.width, rect.y + rect.height),
+                    color,
+                    2 // Thickness of the rectangle lines
+                );
+                console.log(`Detected a pole with aspectRatio: ${aspectRatio}, width: ${rect.width}, height: ${rect.height}`);
+        }
     }
-    console.log(`Detected a pole with aspectRatio: ${aspectRatio}, width: ${rect.width}, height: ${rect.height}`);
-  }
 
-  // Clean up
-  gray.delete();
-  blurred.delete();
-  edges.delete();
-  contours.delete();
-  hierarchy.delete();
+    // Clean up
+    hsv.delete();
+    lowerWhite.delete();
+    upperWhite.delete();
+    mask.delete();
+    gray.delete();
+    blurred.delete();
+    edges.delete();
+    contours.delete();
+    hierarchy.delete();
 }
+
