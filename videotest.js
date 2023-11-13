@@ -24,3 +24,6 @@ cv['onRuntimeInitialized'] = () => {
     };
     setTimeout(processSource_Video, 0);
 };
+
+
+//test ca merge colaborarea anului
