@@ -80,36 +80,42 @@ function detectPoles(srcImage, dstImage) {
         cv.CHAIN_APPROX_SIMPLE
     );
 
+    const rightEdgeThreshold = srcImage.cols * 0.75;
+    const heightThreshold = srcImage.rows * 0.6;
+
     // Draw rectangles around the detected poles
     for (let i = 0; i < contours.size(); ++i) {
         let cnt = contours.get(i);
         let rect = cv.boundingRect(cnt);
         let aspectRatio = rect.width / rect.height;
 
-        const rightEdgeThreshold = srcImage.cols * 0.75;
-
-        if (rect.x + rect.width > rightEdgeThreshold) {
-
-            // Filter the contour by aspect ratio, area, width, and height
-            // Adjust these values as needed for your specific case
-            if (
-                aspectRatio > 0 && // Poles are more vertical, so width should be smaller than height
-                aspectRatio < 1.0 && // Adjust this as necessary
-                rect.width > 1 &&   // Minimum width to avoid detecting very thin structures
-                rect.height > 23 &&  // Minimum height to avoid detecting very short structures
-                rect.height < 50) { // Maximum height to avoid detecting very tall structures
-                    // Assume poles are relatively thin and tall compared to their width
-                    let color = new cv.Scalar(255, 0, 0); // Color for the rectangle (Blue, Green, Red)
-                    cv.rectangle(
-                        dstImage,
-                        new cv.Point(rect.x, rect.y),
-                        new cv.Point(rect.x + rect.width, rect.y + rect.height),
-                        color,
-                        2 // Thickness of the rectangle lines
-                    );
-                    console.log(`Detected a pole with aspectRatio: ${aspectRatio}, width: ${rect.width}, height: ${rect.height}`);
+        if (rect.y + rect.height > heightThreshold) {
+            if (rect.x + rect.width > rightEdgeThreshold) {
+    
+                // Filter the contour by aspect ratio, area, width, and height
+                // Adjust these values as needed for your specific case
+                if (
+                    aspectRatio > 0 && // Poles are more vertical, so width should be smaller than height
+                    aspectRatio < 1.0 && // Adjust this as necessary
+                    rect.width > 1 &&   // Minimum width to avoid detecting very thin structures
+                    rect.height > 23 &&  // Minimum height to avoid detecting very short structures
+                    rect.height < 50) { // Maximum height to avoid detecting very tall structures
+                        // Assume poles are relatively thin and tall compared to their width
+                        let color = new cv.Scalar(255, 0, 0); // Color for the rectangle (Blue, Green, Red)
+                        cv.rectangle(
+                            dstImage,
+                            new cv.Point(rect.x, rect.y),
+                            new cv.Point(rect.x + rect.width, rect.y + rect.height),
+                            color,
+                            2 // Thickness of the rectangle lines
+                        );
+                        console.log(`Detected a pole with aspectRatio: ${aspectRatio}, width: ${rect.width}, height: ${rect.height}`);
+                        console.log("sum: " + (rect.y + rect.height))
+                        console.log("heightTreshold: " + heightThreshold)
+                }
             }
         }
+
 
     }
 
