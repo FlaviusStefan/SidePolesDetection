@@ -7,22 +7,66 @@
         body {
             margin: 0;
             padding: 0;
-            width: 100vw;
-            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Default background color */
+            background-image: url('road-220058_1280.jpg'); /* Default background image */
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding-left: 5vw;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        #video,
+        #canvasOutput {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #video:hover,
+        #canvasOutput:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        canvas {
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
     <h1>Input Video</h1>
-    <video id="video" width="300" height="200" autoplay muted></video>
+    <video id="video" width="400" height="300" autoplay muted></video>
     <h1>Output Video</h1>
-    <canvas id="canvasOutput" width="300" height="200"></canvas>
+    <canvas id="canvasOutput" width="400" height="300"></canvas>
 
-<script defer src="https://docs.opencv.org/master/opencv.js"></script>
-<script defer src="videotest.js"></script>
+    <!-- Allow users to upload a background image -->
+    <input type="file" accept="image/*" onchange="handleBackgroundImage(event)">
+  
+    <script defer src="https://docs.opencv.org/master/opencv.js"></script>
+    <script defer src="videotest.js"></script>
+
+    <script>
+        function handleBackgroundImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                document.body.style.backgroundImage = `url('${e.target.result}')`;
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
 </body>
 
 </html>
