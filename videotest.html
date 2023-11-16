@@ -8,8 +8,8 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0; /* Default background color */
-            background-image: url('road-220058_1280.jpg'); /* Default background image */
+            background-color: #f0f0f0;
+            /* background-image: url('road-220058_1280.jpg'); */
             background-size: cover;
             display: flex;
             flex-direction: column;
@@ -24,7 +24,7 @@
             color: #333;
         }
 
-        #video,
+        /* #video,
         #canvasOutput {
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -35,19 +35,20 @@
         #canvasOutput:hover {
             transform: scale(1.05);
             transition: transform 0.3s ease-in-out;
-        }
+        } */
 
         canvas {
             margin-top: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
     <h1>Input Video</h1>
-    <video id="video" width="400" height="300" autoplay muted></video>
+    <video id="video" width="300" height="200" autoplay muted></video>
     <h1>Output Video</h1>
-    <canvas id="canvasOutput" width="400" height="300"></canvas>
+    <canvas id="canvasOutput" width="300" height="200"></canvas>
 
     <!-- Allow users to upload a background image -->
     <input type="file" accept="image/*" onchange="handleBackgroundImage(event)">
